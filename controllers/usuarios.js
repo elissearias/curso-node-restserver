@@ -14,11 +14,17 @@ const usuariosGet = async (req = request, res = response) => {
     
     //Desestructurar el limite que viene de los argumentos
     const {limite = 5, desde = 0} = req.query;
-    const usuarios = await Usuario.find()
-    .skip(parseInt(desde))
-    .limit(parseInt(limite));
+    const query = {estado:true};
 
+    const [total, usuarios] = await Promise.all([
+        Usuario.countDocuments(query),
+        Usuario.find(query)
+            .skip(parseInt(desde))
+            .limit(parseInt(limite))
+    ]);
     res.json({
+        //resp
+        total,
         usuarios
     });
 };
@@ -28,10 +34,10 @@ const usuariosPost = async (req = request, res = response) => {
     //que se está solicitando
     //desestructurar lo que viene del body
     //pequeña validación al decirle que campos quiero desestructurar
-    const {nombre, correo, password, role} = req.body;
+    const {nombre, correo, password, google, role} = req.body;
 
     //Creamos una instancia de nuestro modelo
-    const usuario = new Usuario({nombre, correo, password, role});
+    const usuario = new Usuario({nombre, correo, password, role, google});
 
 
     //Verificar si el correo existe
@@ -74,10 +80,15 @@ const usuariosPut = async (req = request, res = response) => {
     res.json(usuario);
 };
 
-const usuariosDelete = (req = request, res = response) => {
-    res.json({
-        msg: 'delete API -  controlador'
-    });
+const usuariosDelete = async (req = request, res = response) => {
+    const {id} = req.params;
+
+    //Borrado fisicamente
+    //const usuario = await Usuario.findByIdAndDelete(id);
+   
+   //cambiar estado
+   const usuario = await Usuario.findByIdAndUpdate(id, {estado:false});
+    res.json(usuario);
 };
 
 const usuariosPatch = (req = request, res = response) => {
