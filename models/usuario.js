@@ -40,6 +40,16 @@ const UsuarioSchema = Schema ({
     }
 });
 
+//Quitar contraseña de una forma global para no mostrarla 
+//sobrescribir método llamado toJSON
+UsuarioSchema.methods.toJSON = function () {
+    //desestructuración
+    const { __v, password, ...usuario } = this.toObject();
+
+    //cuando se llame la función regreso el usuario
+    return usuario;
+}
+
 
 
 module.exports = model('Usuario',UsuarioSchema);
